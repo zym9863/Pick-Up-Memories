@@ -184,7 +184,7 @@ export const RecordViewer: React.FC<RecordViewerProps> = ({
         <DialogContent dividers>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
             {/* 内容 */}
-            <Paper elevation={0} sx={{ p: 3, bgcolor: 'grey.50' }}>
+            <Paper elevation={0} sx={{ p: 3, bgcolor: 'background.paper' }}>
               <Typography
                 variant="body1"
                 sx={{
