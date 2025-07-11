@@ -249,18 +249,52 @@ class StorageService {
   // 保存图片文件
   async saveImage(file: File): Promise<string> {
     try {
+      // 验证文件类型
+      if (!file.type.startsWith('image/')) {
+        throw new Error('不支持的文件类型，请选择图片文件');
+      }
+
+      // 检查文件大小（限制为10MB）
+      const maxSize = 10 * 1024 * 1024; // 10MB
+      if (file.size > maxSize) {
+        throw new Error('图片文件过大，请选择小于10MB的图片');
+      }
+
       // 统一使用 base64 编码保存图片
       // 这样可以避免 Tauri 中的文件路径访问问题
       const arrayBuffer = await file.arrayBuffer();
-      const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+
+      // 对于大文件，使用更高效的转换方法
+      let base64: string;
+      if (file.size > 1024 * 1024) { // 1MB以上使用分块处理
+        base64 = await this.arrayBufferToBase64Chunked(arrayBuffer);
+      } else {
+        base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+      }
+
       const mimeType = file.type || 'image/jpeg';
-      
-      return `data:${mimeType};base64,${base64}`;
+      const dataUrl = `data:${mimeType};base64,${base64}`;
+
+      console.log(`Image saved: ${file.name}, size: ${file.size} bytes, type: ${mimeType}`);
+      return dataUrl;
     } catch (error) {
       console.error('Failed to save image:', error);
-      // 如果转换失败，使用 blob URL 作为后备
-      return URL.createObjectURL(file);
+      throw new Error(`图片保存失败: ${error instanceof Error ? error.message : '未知错误'}`);
     }
+  }
+
+  // 分块处理大文件的base64转换
+  private async arrayBufferToBase64Chunked(arrayBuffer: ArrayBuffer): Promise<string> {
+    const uint8Array = new Uint8Array(arrayBuffer);
+    const chunkSize = 8192; // 8KB chunks
+    let result = '';
+
+    for (let i = 0; i < uint8Array.length; i += chunkSize) {
+      const chunk = uint8Array.slice(i, i + chunkSize);
+      result += String.fromCharCode(...chunk);
+    }
+
+    return btoa(result);
   }
 
   // 保存音乐文件（简化版本，暂时返回文件路径）
@@ -423,8 +457,40 @@ class StorageService {
 
   // 获取图片的显示URL
   getImageUrl(imagePath: string): string {
-    // 直接返回路径，因为现在我们使用 data URLs 或 blob URLs
+    // 处理不同类型的图片路径
+    if (!imagePath) {
+      return '';
+    }
+
+    // 如果已经是data URL或blob URL，直接返回
+    if (imagePath.startsWith('data:') || imagePath.startsWith('blob:')) {
+      return imagePath;
+    }
+
+    // 如果是相对路径，尝试构建完整路径
+    if (imagePath.startsWith('/') || imagePath.includes('://')) {
+      return imagePath;
+    }
+
+    // 对于其他情况，假设是base64编码的图片数据
+    if (imagePath.length > 100 && !imagePath.includes('/')) {
+      // 可能是没有前缀的base64数据，添加默认的data URL前缀
+      return `data:image/jpeg;base64,${imagePath}`;
+    }
+
+    // 默认直接返回
     return imagePath;
+  }
+
+  // 验证图片URL是否有效
+  isValidImageUrl(imagePath: string): boolean {
+    if (!imagePath) return false;
+
+    return imagePath.startsWith('data:image/') ||
+           imagePath.startsWith('blob:') ||
+           imagePath.startsWith('http://') ||
+           imagePath.startsWith('https://') ||
+           imagePath.startsWith('/');
   }
 }
 

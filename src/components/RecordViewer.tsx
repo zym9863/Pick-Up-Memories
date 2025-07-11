@@ -102,7 +102,7 @@ export const RecordViewer: React.FC<RecordViewerProps> = ({
             <Typography variant="h6" gutterBottom>
               这段记忆已被尘封
             </Typography>
-            <Typography variant="body2" color="text.secondary" paragraph>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
               等待时光的解封...
             </Typography>
             
@@ -133,8 +133,10 @@ export const RecordViewer: React.FC<RecordViewerProps> = ({
         onClose={onClose}
         maxWidth="md"
         fullWidth
-        PaperProps={{
-          sx: { minHeight: '70vh' }
+        slotProps={{
+          paper: {
+            sx: { minHeight: '70vh' }
+          }
         }}
       >
         <DialogTitle>
@@ -228,6 +230,12 @@ export const RecordViewer: React.FC<RecordViewerProps> = ({
                           objectFit: 'cover',
                           borderRadius: 4
                         }}
+                        onError={(e) => {
+                          console.error('Image load error in viewer:', image);
+                          const target = e.target as HTMLImageElement;
+                          target.style.backgroundColor = '#f5f5f5';
+                          target.alt = '图片加载失败';
+                        }}
                       />
                       <Box
                         sx={{
@@ -318,12 +326,14 @@ export const RecordViewer: React.FC<RecordViewerProps> = ({
         open={!!selectedImage}
         onClose={handleCloseImageViewer}
         maxWidth={false}
-        PaperProps={{
-          sx: {
-            bgcolor: 'transparent',
-            boxShadow: 'none',
-            maxWidth: '90vw',
-            maxHeight: '90vh'
+        slotProps={{
+          paper: {
+            sx: {
+              bgcolor: 'transparent',
+              boxShadow: 'none',
+              maxWidth: '90vw',
+              maxHeight: '90vh'
+            }
           }
         }}
       >

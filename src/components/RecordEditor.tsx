@@ -22,12 +22,20 @@ import {
   Delete as DeleteIcon
 } from '@mui/icons-material';
 import { EmotionalRecord, CreateRecordInput, UpdateRecordInput } from '../types';
+import { storageService } from '../services/storage';
 
 interface RecordEditorProps {
   open: boolean;
   record?: EmotionalRecord;
   onClose: () => void;
   onSave: (data: CreateRecordInput | UpdateRecordInput) => Promise<void>;
+}
+
+// 图片数据接口
+interface ImageData {
+  url: string; // 显示用的URL（可能是blob URL或base64）
+  file?: File; // 原始文件（如果是新上传的）
+  isPersisted: boolean; // 是否已经持久化
 }
 
 export const RecordEditor: React.FC<RecordEditorProps> = ({
@@ -38,7 +46,7 @@ export const RecordEditor: React.FC<RecordEditorProps> = ({
 }) => {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
-  const [images, setImages] = useState<string[]>([]);
+  const [images, setImages] = useState<ImageData[]>([]);
   const [musicUrl, setMusicUrl] = useState<string>('');
   const [musicTitle, setMusicTitle] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
@@ -51,7 +59,11 @@ export const RecordEditor: React.FC<RecordEditorProps> = ({
     if (record) {
       setTitle(record.title);
       setContent(record.content);
-      setImages(record.images);
+      // 将已保存的图片路径转换为ImageData格式
+      setImages(record.images.map(imagePath => ({
+        url: imagePath,
+        isPersisted: true
+      })));
       setMusicUrl(record.musicUrl || '');
       setMusicTitle(record.musicTitle || '');
     } else {
@@ -74,19 +86,51 @@ export const RecordEditor: React.FC<RecordEditorProps> = ({
       input.multiple = true;
       input.accept = 'image/*';
 
-      input.onchange = (e) => {
+      input.onchange = async (e) => {
         const files = (e.target as HTMLInputElement).files;
         if (files) {
           setIsLoading(true);
-          const newImagePaths: string[] = [];
+          setError('');
+          const newImageData: ImageData[] = [];
+          const errors: string[] = [];
 
           for (let i = 0; i < files.length; i++) {
             const file = files[i];
-            const url = URL.createObjectURL(file);
-            newImagePaths.push(url);
+
+            // 验证文件类型
+            if (!file.type.startsWith('image/')) {
+              errors.push(`${file.name}: 不是有效的图片文件`);
+              continue;
+            }
+
+            // 验证文件大小（10MB限制）
+            const maxSize = 10 * 1024 * 1024;
+            if (file.size > maxSize) {
+              errors.push(`${file.name}: 文件过大（超过10MB）`);
+              continue;
+            }
+
+            try {
+              const url = URL.createObjectURL(file);
+              newImageData.push({
+                url,
+                file,
+                isPersisted: false
+              });
+            } catch (fileError) {
+              console.error('Failed to create object URL for file:', file.name, fileError);
+              errors.push(`${file.name}: 处理失败`);
+            }
           }
 
-          setImages(prev => [...prev, ...newImagePaths]);
+          if (newImageData.length > 0) {
+            setImages(prev => [...prev, ...newImageData]);
+          }
+
+          if (errors.length > 0) {
+            setError(`部分图片添加失败：\n${errors.join('\n')}`);
+          }
+
           setIsLoading(false);
         }
       };
@@ -131,7 +175,14 @@ export const RecordEditor: React.FC<RecordEditorProps> = ({
 
   // 删除图片
   const handleDeleteImage = (index: number) => {
-    setImages(prev => prev.filter((_, i) => i !== index));
+    setImages(prev => {
+      const imageToDelete = prev[index];
+      // 如果是临时的blob URL，需要释放内存
+      if (!imageToDelete.isPersisted && imageToDelete.url.startsWith('blob:')) {
+        URL.revokeObjectURL(imageToDelete.url);
+      }
+      return prev.filter((_, i) => i !== index);
+    });
   };
 
   // 删除音乐
@@ -156,10 +207,45 @@ export const RecordEditor: React.FC<RecordEditorProps> = ({
     setError('');
 
     try {
+      // 处理图片：将未持久化的图片转换为base64格式
+      const processedImages: string[] = [];
+      const imageErrors: string[] = [];
+
+      for (let i = 0; i < images.length; i++) {
+        const imageData = images[i];
+
+        if (imageData.isPersisted) {
+          // 已经持久化的图片直接使用
+          processedImages.push(imageData.url);
+        } else if (imageData.file) {
+          // 新上传的图片需要转换为base64
+          try {
+            const base64Url = await storageService.saveImage(imageData.file);
+            processedImages.push(base64Url);
+          } catch (error) {
+            console.error('Failed to convert image to base64:', error);
+            const errorMessage = error instanceof Error ? error.message : '未知错误';
+            imageErrors.push(`图片 ${i + 1}: ${errorMessage}`);
+          }
+        }
+      }
+
+      // 如果有图片处理失败，询问用户是否继续
+      if (imageErrors.length > 0) {
+        const shouldContinue = window.confirm(
+          `以下图片处理失败：\n${imageErrors.join('\n')}\n\n是否继续保存记录（不包含失败的图片）？`
+        );
+
+        if (!shouldContinue) {
+          setError('保存已取消');
+          return;
+        }
+      }
+
       const data = {
         title: title.trim(),
         content: content.trim(),
-        images,
+        images: processedImages,
         musicUrl: musicUrl || undefined,
         musicTitle: musicTitle || undefined
       };
@@ -188,8 +274,10 @@ export const RecordEditor: React.FC<RecordEditorProps> = ({
       onClose={onClose}
       maxWidth="md"
       fullWidth
-      PaperProps={{
-        sx: { minHeight: '70vh' }
+      slotProps={{
+        paper: {
+          sx: { minHeight: '70vh' }
+        }
       }}
     >
       <DialogTitle>
@@ -249,23 +337,38 @@ export const RecordEditor: React.FC<RecordEditorProps> = ({
 
             {images.length > 0 && (
               <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: 2 }}>
-                {images.map((imagePath, index) => (
+                {images.map((imageData, index) => (
                   <Card key={index}>
                     <CardMedia
                       component="img"
                       height="120"
-                      image={imagePath}
+                      image={imageData.url}
                       alt={`图片 ${index + 1}`}
                       sx={{ objectFit: 'cover' }}
+                      onError={(e) => {
+                        console.error('Image load error:', imageData.url);
+                        // 可以在这里添加错误图片的占位符
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                      }}
                     />
                     <CardActions sx={{ justifyContent: 'center', p: 1 }}>
                       <IconButton
                         size="small"
                         color="error"
                         onClick={() => handleDeleteImage(index)}
+                        title="删除图片"
                       >
                         <DeleteIcon />
                       </IconButton>
+                      {!imageData.isPersisted && (
+                        <Chip
+                          label="新"
+                          size="small"
+                          color="primary"
+                          sx={{ ml: 1, fontSize: '0.7rem' }}
+                        />
+                      )}
                     </CardActions>
                   </Card>
                 ))}
