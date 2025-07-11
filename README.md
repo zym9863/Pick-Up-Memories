@@ -1,5 +1,7 @@
 # 拾忆 - Pick Up Memories
 
+[English Version](./README_EN.md)
+
 一个基于 Tauri + React + TypeScript 的情感日记应用，提供绝对私密的本地存储和独特的时光尘封功能。
 
 ## 核心功能
