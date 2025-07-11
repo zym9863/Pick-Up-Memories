@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "pick-up-memories",
+  "productName": "拾忆",
   "version": "0.1.0",
   "identifier": "com.pick-up-memories.app",
   "build": {
@@ -12,15 +12,20 @@
   "app": {
     "windows": [
       {
-        "title": "pick-up-memories",
-        "width": 800,
-        "height": 600
+        "title": "拾忆 - Pick Up Memories",
+        "width": 1200,
+        "height": 800,
+        "minWidth": 800,
+        "minHeight": 600,
+        "center": true,
+        "resizable": true
       }
     ],
     "security": {
       "csp": null
     }
   },
+
   "bundle": {
     "active": true,
     "targets": "all",

@@ -1,7 +1,133 @@
-# Tauri + React + Typescript
+# 拾忆 - Pick Up Memories
 
-This template should help get you started developing with Tauri, React and Typescript in Vite.
+一个基于 Tauri + React + TypeScript 的情感日记应用，提供绝对私密的本地存储和独特的时光尘封功能。
 
-## Recommended IDE Setup
+## 核心功能
 
-- [VS Code](https://code.visualstudio.com/) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer)
+### 情绪树洞 (Emotional Tree Hole)
+- 🌳 **绝对私密**：所有数据存储在本地，确保隐私安全
+- 📝 **自由表达**：支持文字、图片、音乐的多媒体记录
+- 💭 **情感宣泄**：像对树洞倾诉一样，记录无法与人言说的情绪和秘密
+- 🎵 **音乐关联**：为每段回忆关联一首代表心情的歌曲
+
+### 时光尘封 (Time-Sealed Dust)
+- 🔒 **主动尘封**：将特定记录封存，设定解封时间
+- ⏰ **定时解封**：在指定时间自动解封，重新面对回忆
+- 🗑️ **自动销毁**：可设置记录在特定时间后自动销毁
+- 🎭 **仪式感**：将"清空记忆"和"放手"转化为可控的主动行为
+
+## 技术栈
+
+- **前端框架**：React 18 + TypeScript
+- **桌面应用**：Tauri 2.0
+- **UI 组件库**：Material-UI (MUI)
+- **状态管理**：Zustand
+- **包管理器**：pnpm
+- **本地存储**：Tauri 文件系统 API
+
+## 开发环境设置
+
+### 前置要求
+- Node.js 18+
+- Rust 1.70+
+- pnpm
+
+### 安装依赖
+```bash
+pnpm install
+```
+
+### 开发模式
+```bash
+pnpm tauri dev
+```
+
+### 构建应用
+```bash
+pnpm tauri build
+```
+
+## 功能特性
+
+### 记录管理
+- ✅ 创建、编辑、删除情感记录
+- ✅ 支持文字、图片、音乐的多媒体内容
+- ✅ 搜索和过滤功能
+- ✅ 多种排序方式
+
+### 时光尘封
+- ✅ 永久尘封或定时解封
+- ✅ 自动销毁功能
+- ✅ 尘封状态可视化
+- ✅ 解封和销毁提醒
+
+### 数据安全
+- ✅ 本地存储，确保隐私
+- ✅ 数据导入导出
+- ✅ 自动备份提醒
+
+### 用户体验
+- ✅ 深色/浅色主题切换
+- ✅ 响应式设计
+- ✅ 优雅的动画效果
+- ✅ 直观的操作界面
+
+## 应用截图
+
+应用启动后，您将看到：
+1. **主页面**：显示所有记录的卡片视图，包含统计信息
+2. **记录编辑器**：支持富文本、图片和音乐的编辑界面
+3. **尘封对话框**：设置记录的尘封和销毁时间
+4. **记录查看器**：查看完整记录内容，支持全屏图片查看
+
+## 设计理念
+
+> "泪滴在缅怀过去点碎了我的秘密，击穿了我的回忆掏空了我的耐心"
+
+这个应用旨在：
+- 为那些被击穿和点碎的情感碎片提供一个安全的容器
+- 让用户能够主动选择何时直面回忆，何时选择"放手"
+- 通过仪式感帮助用户在自己的节奏中与过去和解
+
+## 开发说明
+
+### 项目结构
+```
+src/
+├── components/          # React 组件
+│   ├── HomePage.tsx     # 主页面
+│   ├── RecordCard.tsx   # 记录卡片
+│   ├── RecordEditor.tsx # 记录编辑器
+│   ├── RecordViewer.tsx # 记录查看器
+│   ├── SealDialog.tsx   # 尘封对话框
+│   └── ThemeProvider.tsx # 主题提供者
+├── services/            # 服务层
+│   ├── storage.ts       # 存储服务
+│   └── notification.ts  # 通知服务
+├── stores/              # 状态管理
+│   └── useAppStore.ts   # 应用状态
+├── types/               # 类型定义
+│   └── index.ts         # 所有类型定义
+└── App.tsx              # 应用入口
+
+src-tauri/
+├── src/
+│   └── lib.rs           # Rust 后端代码
+├── Cargo.toml           # Rust 依赖
+└── tauri.conf.json      # Tauri 配置
+```
+
+### 贡献指南
+1. Fork 项目
+2. 创建功能分支
+3. 提交更改
+4. 推送到分支
+5. 创建 Pull Request
+
+## 许可证
+
+MIT License
+
+## 致谢
+
+感谢所有为这个项目提供灵感和支持的人。愿每个人都能在自己的节奏中找到与过去和解的方式。
