@@ -15,6 +15,7 @@ class StorageService {
   private dataDir: string | null = null;
   private imagesDir: string | null = null;
   private musicDir: string | null = null;
+  private useFallback: boolean = false;
 
   // 初始化存储目录
   async initialize(): Promise<void> {
@@ -23,19 +24,28 @@ class StorageService {
       this.imagesDir = 'pick-up-memories/images';
       this.musicDir = 'pick-up-memories/music';
 
-      // 创建必要的目录
-      await this.ensureDirectoryExists(this.dataDir);
-      await this.ensureDirectoryExists(this.imagesDir);
-      await this.ensureDirectoryExists(this.musicDir);
+      // 尝试创建必要的目录
+      try {
+        await this.ensureDirectoryExists(this.dataDir);
+        await this.ensureDirectoryExists(this.imagesDir);
+        await this.ensureDirectoryExists(this.musicDir);
+        this.useFallback = false;
+      } catch (error) {
+        console.warn('Tauri file system not available, using localStorage fallback');
+        this.useFallback = true;
+      }
 
       console.log('Storage service initialized:', {
         dataDir: this.dataDir,
         imagesDir: this.imagesDir,
-        musicDir: this.musicDir
+        musicDir: this.musicDir,
+        useFallback: this.useFallback
       });
     } catch (error) {
       console.error('Failed to initialize storage service:', error);
-      throw new Error('存储服务初始化失败');
+      // 使用 localStorage 作为后备
+      this.useFallback = true;
+      console.log('Using localStorage as fallback storage');
     }
   }
 
@@ -71,6 +81,10 @@ class StorageService {
   // 读取所有记录
   async getAllRecords(): Promise<EmotionalRecord[]> {
     try {
+      if (this.useFallback) {
+        return this.getAllRecordsFromLocalStorage();
+      }
+
       const filePath = this.getRecordsFilePath();
       const fileExists = await exists(filePath, { baseDir: BaseDirectory.AppData });
 
@@ -100,6 +114,42 @@ class StorageService {
       return validRecords;
     } catch (error) {
       console.error('Failed to read records:', error);
+      // 如果 Tauri 文件系统失败，尝试使用 localStorage
+      if (!this.useFallback) {
+        this.useFallback = true;
+        return this.getAllRecordsFromLocalStorage();
+      }
+      return [];
+    }
+  }
+
+  // 从 localStorage 读取记录
+  private getAllRecordsFromLocalStorage(): EmotionalRecord[] {
+    try {
+      const stored = localStorage.getItem('pick-up-memories-records');
+      if (!stored) {
+        return [];
+      }
+      const records = JSON.parse(stored) as EmotionalRecord[];
+
+      // 检查并处理过期的自动销毁记录
+      const now = new Date().toISOString();
+      const validRecords = records.filter(record => {
+        if (record.autoDestroyAt && record.autoDestroyAt <= now) {
+          this.deleteRecordFiles(record).catch(console.error);
+          return false;
+        }
+        return true;
+      });
+
+      // 如果有记录被删除，更新 localStorage
+      if (validRecords.length !== records.length) {
+        localStorage.setItem('pick-up-memories-records', JSON.stringify(validRecords));
+      }
+
+      return validRecords;
+    } catch (error) {
+      console.error('Failed to read records from localStorage:', error);
       return [];
     }
   }
@@ -107,11 +157,32 @@ class StorageService {
   // 保存所有记录
   async saveAllRecords(records: EmotionalRecord[]): Promise<void> {
     try {
+      if (this.useFallback) {
+        this.saveAllRecordsToLocalStorage(records);
+        return;
+      }
+
       const filePath = this.getRecordsFilePath();
       const content = JSON.stringify(records, null, 2);
       await writeTextFile(filePath, content, { baseDir: BaseDirectory.AppData });
     } catch (error) {
       console.error('Failed to save records:', error);
+      // 如果 Tauri 文件系统失败，尝试使用 localStorage
+      if (!this.useFallback) {
+        this.useFallback = true;
+        this.saveAllRecordsToLocalStorage(records);
+        return;
+      }
+      throw new Error('保存记录失败');
+    }
+  }
+
+  // 保存记录到 localStorage
+  private saveAllRecordsToLocalStorage(records: EmotionalRecord[]): void {
+    try {
+      localStorage.setItem('pick-up-memories-records', JSON.stringify(records));
+    } catch (error) {
+      console.error('Failed to save records to localStorage:', error);
       throw new Error('保存记录失败');
     }
   }
@@ -200,6 +271,10 @@ class StorageService {
   // 读取应用设置
   async getSettings(): Promise<AppSettings | null> {
     try {
+      if (this.useFallback) {
+        return this.getSettingsFromLocalStorage();
+      }
+
       const filePath = this.getSettingsFilePath();
       const fileExists = await exists(filePath, { baseDir: BaseDirectory.AppData });
 
@@ -211,6 +286,22 @@ class StorageService {
       return JSON.parse(content) as AppSettings;
     } catch (error) {
       console.error('Failed to read settings:', error);
+      // 如果 Tauri 文件系统失败，尝试使用 localStorage
+      if (!this.useFallback) {
+        this.useFallback = true;
+        return this.getSettingsFromLocalStorage();
+      }
+      return null;
+    }
+  }
+
+  // 从 localStorage 读取设置
+  private getSettingsFromLocalStorage(): AppSettings | null {
+    try {
+      const stored = localStorage.getItem('pick-up-memories-settings');
+      return stored ? JSON.parse(stored) as AppSettings : null;
+    } catch (error) {
+      console.error('Failed to read settings from localStorage:', error);
       return null;
     }
   }
@@ -218,11 +309,32 @@ class StorageService {
   // 保存应用设置
   async saveSettings(settings: AppSettings): Promise<void> {
     try {
+      if (this.useFallback) {
+        this.saveSettingsToLocalStorage(settings);
+        return;
+      }
+
       const filePath = this.getSettingsFilePath();
       const content = JSON.stringify(settings, null, 2);
       await writeTextFile(filePath, content, { baseDir: BaseDirectory.AppData });
     } catch (error) {
       console.error('Failed to save settings:', error);
+      // 如果 Tauri 文件系统失败，尝试使用 localStorage
+      if (!this.useFallback) {
+        this.useFallback = true;
+        this.saveSettingsToLocalStorage(settings);
+        return;
+      }
+      throw new Error('保存设置失败');
+    }
+  }
+
+  // 保存设置到 localStorage
+  private saveSettingsToLocalStorage(settings: AppSettings): void {
+    try {
+      localStorage.setItem('pick-up-memories-settings', JSON.stringify(settings));
+    } catch (error) {
+      console.error('Failed to save settings to localStorage:', error);
       throw new Error('保存设置失败');
     }
   }

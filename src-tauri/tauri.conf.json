@@ -18,11 +18,13 @@
         "minWidth": 800,
         "minHeight": 600,
         "center": true,
-        "resizable": true
+        "resizable": true,
+        "label": "main"
       }
     ],
     "security": {
-      "csp": null
+      "csp": null,
+      "capabilities": ["default"]
     }
   },
 
