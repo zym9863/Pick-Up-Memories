@@ -41,7 +41,9 @@ export const HomePage: React.FC = () => {
     error,
     filter,
     sort,
+    isInitialized,
     initialize,
+    resetInitialization,
     loadRecords,
     createRecord,
     updateRecord,
@@ -64,10 +66,31 @@ export const HomePage: React.FC = () => {
   const [sealingRecordId, setSealingRecordId] = useState<string>('');
   const [searchText, setSearchText] = useState(filter.searchText || '');
 
-  // 初始化应用
+  // 初始化应用 - 只在组件首次挂载时执行
   useEffect(() => {
-    initialize();
-  }, [initialize]);
+    console.log('HomePage: Component mounted, checking initialization status...');
+    console.log('HomePage: isInitialized:', isInitialized, 'isLoading:', isLoading);
+
+    if (!isInitialized && !isLoading) {
+      console.log('HomePage: Starting app initialization...');
+      initialize().catch(error => {
+        console.error('HomePage: Failed to initialize app:', error);
+      });
+    } else {
+      console.log('HomePage: App already initialized or initializing, skipping...');
+    }
+
+    // 在开发模式下，React.StrictMode 会导致组件卸载后重新挂载
+    // 这里添加清理函数来处理这种情况
+    return () => {
+      console.log('HomePage: Component unmounting...');
+      // 在开发模式下重置初始化状态，允许重新初始化
+      // 使用 import.meta.env 来检查开发模式
+      if (import.meta.env.DEV) {
+        resetInitialization();
+      }
+    };
+  }, []); // 空依赖数组，确保只执行一次
 
   // 获取过滤后的记录
   const filteredRecords = getFilteredRecords();

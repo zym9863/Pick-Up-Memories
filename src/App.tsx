@@ -6,6 +6,7 @@ import { notificationService } from './services/notification';
 function App() {
   // 初始化通知服务
   useEffect(() => {
+    console.log('App: Initializing notification service...');
     notificationService.initialize();
 
     // 清理函数

@@ -16,15 +16,17 @@ interface AppState {
   records: EmotionalRecord[];
   currentRecord: EmotionalRecord | null;
   settings: AppSettings | null;
-  
+
   // UI 状态
   isLoading: boolean;
   error: string | null;
   filter: RecordFilter;
   sort: SortConfig;
+  isInitialized: boolean;
   
   // 初始化
   initialize: () => Promise<void>;
+  resetInitialization: () => void;
   
   // 记录操作
   loadRecords: () => Promise<void>;
@@ -91,29 +93,53 @@ export const useAppStore = create<AppState>()(
       error: null,
       filter: defaultFilter,
       sort: defaultSort,
+      isInitialized: false,
 
       // 初始化应用
       initialize: async () => {
+        const { isInitialized, isLoading } = get();
+
+        // 防止重复初始化
+        if (isInitialized || isLoading) {
+          console.log('App already initialized or initializing, skipping...');
+          return;
+        }
+
+        console.log('Starting app initialization...');
         set({ isLoading: true, error: null });
+
         try {
           await storageService.initialize();
+          console.log('Storage service initialized');
+
           await Promise.all([
             get().loadRecords(),
             get().loadSettings()
           ]);
+
+          set({ isInitialized: true });
+          console.log('App initialization completed successfully');
         } catch (error) {
           console.error('Failed to initialize app:', error);
-          set({ error: '应用初始化失败' });
+          set({ error: '应用初始化失败', isInitialized: false });
         } finally {
           set({ isLoading: false });
         }
       },
 
+      // 重置初始化状态（用于开发模式下的重新初始化）
+      resetInitialization: () => {
+        console.log('Resetting initialization state...');
+        set({ isInitialized: false });
+      },
+
       // 加载记录
       loadRecords: async () => {
+        console.log('Loading records...');
         set({ isLoading: true, error: null });
         try {
           const records = await storageService.getAllRecords();
+          console.log(`Loaded ${records.length} records:`, records.map(r => ({ id: r.id, title: r.title })));
           set({ records });
         } catch (error) {
           console.error('Failed to load records:', error);
