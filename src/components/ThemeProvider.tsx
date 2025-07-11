@@ -55,42 +55,43 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
       palette: {
         mode: isDarkMode ? 'dark' : 'light',
         primary: {
-          main: settings?.theme?.primaryColor || '#1976d2',
-          light: isDarkMode ? '#64b5f6' : '#42a5f5',
-          dark: isDarkMode ? '#1565c0' : '#1565c0',
+          main: settings?.theme?.primaryColor || (isDarkMode ? '#bb86fc' : '#6750a4'),
+          light: isDarkMode ? '#d7aefb' : '#9575cd',
+          dark: isDarkMode ? '#985eff' : '#4527a0',
+          contrastText: '#ffffff',
         },
         secondary: {
-          main: '#ff9800',
-          light: '#ffb74d',
-          dark: '#f57c00',
+          main: isDarkMode ? '#03dac6' : '#006a6b',
+          light: isDarkMode ? '#5dfdeb' : '#52a29d',
+          dark: isDarkMode ? '#00a896' : '#004d40',
         },
         background: {
-          default: isDarkMode ? '#121212' : '#fafafa',
-          paper: isDarkMode ? '#1e1e1e' : '#ffffff',
+          default: isDarkMode ? '#0f0f0f' : '#fefbff',
+          paper: isDarkMode ? '#1c1b1f' : '#ffffff',
         },
         text: {
-          primary: isDarkMode ? '#ffffff' : '#333333',
-          secondary: isDarkMode ? '#b0b0b0' : '#666666',
+          primary: isDarkMode ? '#e6e1e5' : '#1c1b1f',
+          secondary: isDarkMode ? '#cac4d0' : '#49454f',
         },
         warning: {
-          main: '#ff9800',
-          light: '#ffb74d',
-          dark: '#f57c00',
+          main: '#ff8f00',
+          light: '#ffb300',
+          dark: '#ff6f00',
         },
         error: {
-          main: '#f44336',
-          light: '#e57373',
-          dark: '#d32f2f',
+          main: '#ba1a1a',
+          light: '#de3730',
+          dark: '#93000a',
         },
         success: {
-          main: '#4caf50',
-          light: '#81c784',
-          dark: '#388e3c',
+          main: '#006e1c',
+          light: '#4caf50',
+          dark: '#004d40',
         },
         info: {
-          main: '#2196f3',
-          light: '#64b5f6',
-          dark: '#1976d2',
+          main: '#0061a4',
+          light: '#5a95f5',
+          dark: '#003c75',
         },
       },
       typography: {
@@ -106,27 +107,31 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
           '"Segoe UI Emoji"',
           '"Segoe UI Symbol"',
           '"Microsoft YaHei"',
+          '"Noto Sans SC"',
           '"SimSun"',
         ].join(','),
         h1: {
           fontSize: '2.5rem',
-          fontWeight: 600,
+          fontWeight: 700,
           lineHeight: 1.2,
+          letterSpacing: '-0.02em',
         },
         h2: {
           fontSize: '2rem',
-          fontWeight: 600,
-          lineHeight: 1.3,
+          fontWeight: 700,
+          lineHeight: 1.2,
+          letterSpacing: '-0.01em',
         },
         h3: {
           fontSize: '1.75rem',
           fontWeight: 600,
           lineHeight: 1.3,
+          letterSpacing: '-0.01em',
         },
         h4: {
           fontSize: '1.5rem',
           fontWeight: 600,
-          lineHeight: 1.4,
+          lineHeight: 1.3,
         },
         h5: {
           fontSize: '1.25rem',
@@ -141,10 +146,12 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
         body1: {
           fontSize: '1rem',
           lineHeight: 1.6,
+          letterSpacing: '0.01em',
         },
         body2: {
           fontSize: '0.875rem',
           lineHeight: 1.6,
+          letterSpacing: '0.01em',
         },
         caption: {
           fontSize: '0.75rem',
@@ -152,32 +159,55 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
         },
       },
       shape: {
-        borderRadius: 12,
+        borderRadius: 16,
       },
       components: {
         MuiCard: {
           styleOverrides: {
             root: {
-              borderRadius: 16,
+              borderRadius: 20,
+              border: isDarkMode 
+                ? '1px solid rgba(255,255,255,0.1)' 
+                : '1px solid rgba(0,0,0,0.05)',
               boxShadow: isDarkMode 
-                ? '0 4px 20px rgba(0,0,0,0.3)' 
-                : '0 4px 20px rgba(0,0,0,0.1)',
-              transition: 'all 0.3s ease-in-out',
+                ? '0 8px 32px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.2)' 
+                : '0 8px 32px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.04)',
+              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+              backdropFilter: 'blur(10px)',
+              '&:hover': {
+                transform: 'translateY(-4px)',
+                boxShadow: isDarkMode 
+                  ? '0 12px 40px rgba(0,0,0,0.5), 0 4px 12px rgba(0,0,0,0.3)' 
+                  : '0 12px 40px rgba(0,0,0,0.12), 0 4px 12px rgba(0,0,0,0.08)',
+              },
             },
           },
         },
         MuiButton: {
           styleOverrides: {
             root: {
-              borderRadius: 8,
+              borderRadius: 12,
               textTransform: 'none',
               fontWeight: 600,
-              padding: '8px 16px',
+              padding: '10px 20px',
+              fontSize: '0.875rem',
+              transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
             },
             contained: {
-              boxShadow: 'none',
+              boxShadow: '0 4px 16px rgba(0,0,0,0.1)',
               '&:hover': {
-                boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                transform: 'translateY(-2px)',
+                boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
+              },
+              '&:active': {
+                transform: 'translateY(0)',
+              },
+            },
+            outlined: {
+              border: '2px solid',
+              '&:hover': {
+                border: '2px solid',
+                transform: 'translateY(-1px)',
               },
             },
           },
@@ -185,9 +215,15 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
         MuiFab: {
           styleOverrides: {
             root: {
-              boxShadow: '0 6px 20px rgba(0,0,0,0.15)',
+              borderRadius: 20,
+              boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
+              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
               '&:hover': {
-                boxShadow: '0 8px 25px rgba(0,0,0,0.2)',
+                transform: 'scale(1.05) translateY(-2px)',
+                boxShadow: '0 12px 32px rgba(0,0,0,0.2)',
+              },
+              '&:active': {
+                transform: 'scale(0.98)',
               },
             },
           },
@@ -196,7 +232,18 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
           styleOverrides: {
             root: {
               '& .MuiOutlinedInput-root': {
-                borderRadius: 8,
+                borderRadius: 12,
+                transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                '&:hover': {
+                  '& .MuiOutlinedInput-notchedOutline': {
+                    borderWidth: '2px',
+                  },
+                },
+                '&.Mui-focused': {
+                  '& .MuiOutlinedInput-notchedOutline': {
+                    borderWidth: '2px',
+                  },
+                },
               },
             },
           },
@@ -204,14 +251,21 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
         MuiDialog: {
           styleOverrides: {
             paper: {
-              borderRadius: 16,
+              borderRadius: 24,
+              backdropFilter: 'blur(10px)',
             },
           },
         },
         MuiChip: {
           styleOverrides: {
             root: {
-              borderRadius: 16,
+              borderRadius: 20,
+              fontWeight: 500,
+              transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+              '&:hover': {
+                transform: 'translateY(-1px)',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+              },
             },
           },
         },
@@ -219,6 +273,40 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
           styleOverrides: {
             root: {
               backgroundImage: 'none',
+              borderRadius: 16,
+            },
+            elevation1: {
+              boxShadow: isDarkMode 
+                ? '0 4px 16px rgba(0,0,0,0.3)' 
+                : '0 4px 16px rgba(0,0,0,0.08)',
+            },
+          },
+        },
+        MuiIconButton: {
+          styleOverrides: {
+            root: {
+              borderRadius: 12,
+              transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+              '&:hover': {
+                transform: 'scale(1.05)',
+                backgroundColor: isDarkMode 
+                  ? 'rgba(255,255,255,0.1)' 
+                  : 'rgba(0,0,0,0.04)',
+              },
+            },
+          },
+        },
+        MuiAppBar: {
+          styleOverrides: {
+            root: {
+              boxShadow: 'none',
+              borderBottom: isDarkMode 
+                ? '1px solid rgba(255,255,255,0.1)' 
+                : '1px solid rgba(0,0,0,0.08)',
+              backdropFilter: 'blur(10px)',
+              backgroundColor: isDarkMode 
+                ? 'rgba(28,27,31,0.8)' 
+                : 'rgba(255,255,255,0.8)',
             },
           },
         },

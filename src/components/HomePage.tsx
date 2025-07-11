@@ -24,9 +24,12 @@ import {
   Search as SearchIcon,
   Refresh as RefreshIcon,
   Backup as BackupIcon,
-  Restore as RestoreIcon
+  Restore as RestoreIcon,
+  DarkMode as DarkModeIcon,
+  LightMode as LightModeIcon
 } from '@mui/icons-material';
 import { useAppStore } from '../stores/useAppStore';
+import { useTheme } from './ThemeProvider';
 import { RecordCard } from './RecordCard';
 import { RecordEditor } from './RecordEditor';
 import { RecordViewer } from './RecordViewer';
@@ -58,6 +61,8 @@ export const HomePage: React.FC = () => {
     exportData,
     importData
   } = useAppStore();
+
+  const { toggleTheme, isDarkMode } = useTheme();
 
   const [editorOpen, setEditorOpen] = useState(false);
   const [viewerOpen, setViewerOpen] = useState(false);
@@ -155,54 +160,119 @@ export const HomePage: React.FC = () => {
   const stats = getStats();
 
   return (
-    <Container maxWidth="lg" sx={{ py: 3 }}>
+    <Container maxWidth="lg" sx={{ py: 4, minHeight: '100vh' }}>
       {/* 页面标题和统计 */}
-      <Box sx={{ mb: 4 }}>
-        <Typography variant="h3" component="h1" gutterBottom align="center">
+      <Box sx={{ 
+        mb: 6, 
+        textAlign: 'center',
+        background: 'linear-gradient(135deg, rgba(103,80,164,0.1) 0%, rgba(3,218,198,0.1) 100%)',
+        borderRadius: 4,
+        p: 4,
+        backdropFilter: 'blur(10px)',
+        border: '1px solid rgba(255,255,255,0.1)'
+      }}>
+        <Typography 
+          variant="h2" 
+          component="h1" 
+          gutterBottom 
+          sx={{ 
+            background: 'linear-gradient(135deg, #6750a4 0%, #03dac6 100%)',
+            backgroundClip: 'text',
+            WebkitBackgroundClip: 'text',
+            color: 'transparent',
+            fontWeight: 700,
+            mb: 2
+          }}
+        >
           拾忆
         </Typography>
-        <Typography variant="h6" color="text.secondary" align="center" gutterBottom>
+        <Typography 
+          variant="h6" 
+          color="text.secondary" 
+          sx={{ 
+            mb: 4,
+            fontStyle: 'italic',
+            opacity: 0.8
+          }}
+        >
           泪滴在缅怀过去点碎了我的秘密
         </Typography>
         
         {/* 统计卡片 */}
-        <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 2, mt: 2 }}>
-          <Card>
-            <CardContent sx={{ textAlign: 'center', py: 2 }}>
-              <Typography variant="h4" color="primary">
+        <Box sx={{ 
+          display: 'grid', 
+          gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', 
+          gap: 3, 
+          mt: 4 
+        }}>
+          <Card sx={{ 
+            background: 'linear-gradient(135deg, rgba(25,118,210,0.1) 0%, rgba(25,118,210,0.05) 100%)',
+            border: '1px solid rgba(25,118,210,0.2)',
+            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+            '&:hover': {
+              transform: 'translateY(-8px) scale(1.02)',
+              background: 'linear-gradient(135deg, rgba(25,118,210,0.15) 0%, rgba(25,118,210,0.08) 100%)',
+            }
+          }}>
+            <CardContent sx={{ textAlign: 'center', py: 3 }}>
+              <Typography variant="h3" color="primary" sx={{ fontWeight: 700, mb: 1 }}>
                 {stats.total}
               </Typography>
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
                 总记录
               </Typography>
             </CardContent>
           </Card>
-          <Card>
-            <CardContent sx={{ textAlign: 'center', py: 2 }}>
-              <Typography variant="h4" color="warning.main">
+          <Card sx={{ 
+            background: 'linear-gradient(135deg, rgba(255,143,0,0.1) 0%, rgba(255,143,0,0.05) 100%)',
+            border: '1px solid rgba(255,143,0,0.2)',
+            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+            '&:hover': {
+              transform: 'translateY(-8px) scale(1.02)',
+              background: 'linear-gradient(135deg, rgba(255,143,0,0.15) 0%, rgba(255,143,0,0.08) 100%)',
+            }
+          }}>
+            <CardContent sx={{ textAlign: 'center', py: 3 }}>
+              <Typography variant="h3" color="warning.main" sx={{ fontWeight: 700, mb: 1 }}>
                 {stats.sealed}
               </Typography>
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
                 已尘封
               </Typography>
             </CardContent>
           </Card>
-          <Card>
-            <CardContent sx={{ textAlign: 'center', py: 2 }}>
-              <Typography variant="h4" color="info.main">
+          <Card sx={{ 
+            background: 'linear-gradient(135deg, rgba(33,150,243,0.1) 0%, rgba(33,150,243,0.05) 100%)',
+            border: '1px solid rgba(33,150,243,0.2)',
+            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+            '&:hover': {
+              transform: 'translateY(-8px) scale(1.02)',
+              background: 'linear-gradient(135deg, rgba(33,150,243,0.15) 0%, rgba(33,150,243,0.08) 100%)',
+            }
+          }}>
+            <CardContent sx={{ textAlign: 'center', py: 3 }}>
+              <Typography variant="h3" color="info.main" sx={{ fontWeight: 700, mb: 1 }}>
                 {stats.withImages}
               </Typography>
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
                 含图片
               </Typography>
             </CardContent>
           </Card>
-          <Card>
-            <CardContent sx={{ textAlign: 'center', py: 2 }}>
-              <Typography variant="h4" color="success.main">
+          <Card sx={{ 
+            background: 'linear-gradient(135deg, rgba(76,175,80,0.1) 0%, rgba(76,175,80,0.05) 100%)',
+            border: '1px solid rgba(76,175,80,0.2)',
+            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+            '&:hover': {
+              transform: 'translateY(-8px) scale(1.02)',
+              background: 'linear-gradient(135deg, rgba(76,175,80,0.15) 0%, rgba(76,175,80,0.08) 100%)',
+            }
+          }}>
+            <CardContent sx={{ textAlign: 'center', py: 3 }}>
+              <Typography variant="h3" color="success.main" sx={{ fontWeight: 700, mb: 1 }}>
                 {stats.withMusic}
               </Typography>
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
                 含音乐
               </Typography>
             </CardContent>
@@ -218,66 +288,152 @@ export const HomePage: React.FC = () => {
       )}
 
       {/* 工具栏 */}
-      <Paper elevation={1} sx={{ p: 2, mb: 3 }}>
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+      <Paper 
+        elevation={0} 
+        sx={{ 
+          p: 3, 
+          mb: 4,
+          background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)',
+          backdropFilter: 'blur(20px)',
+          border: '1px solid rgba(255,255,255,0.1)',
+          borderRadius: 3
+        }}
+      >
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
           {/* 第一行：搜索和排序 */}
-          <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center' }}>
+          <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap', alignItems: 'center' }}>
             <TextField
-              size="small"
-              placeholder="搜索记录..."
+              size="medium"
+              placeholder="搜索你的记忆..."
               value={searchText}
               onChange={(e) => handleSearch(e.target.value)}
-              sx={{ minWidth: 200, flex: 1 }}
+              sx={{ 
+                minWidth: 300, 
+                flex: 1,
+                '& .MuiOutlinedInput-root': {
+                  backgroundColor: 'rgba(255,255,255,0.08)',
+                  backdropFilter: 'blur(10px)',
+                  '&:hover': {
+                    backgroundColor: 'rgba(255,255,255,0.12)',
+                  },
+                  '&.Mui-focused': {
+                    backgroundColor: 'rgba(255,255,255,0.15)',
+                  }
+                }
+              }}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <SearchIcon />
+                    <SearchIcon sx={{ color: 'primary.main' }} />
                   </InputAdornment>
                 ),
               }}
             />
 
-            <FormControl size="small" sx={{ minWidth: 120 }}>
-              <InputLabel>排序</InputLabel>
+            <FormControl 
+              size="medium" 
+              sx={{ 
+                minWidth: 140,
+                '& .MuiOutlinedInput-root': {
+                  backgroundColor: 'rgba(255,255,255,0.08)',
+                  backdropFilter: 'blur(10px)',
+                }
+              }}
+            >
+              <InputLabel>排序方式</InputLabel>
               <Select
                 value={sort.field}
-                label="排序"
+                label="排序方式"
                 onChange={(e) => handleSortChange(e.target.value as SortOption)}
               >
-                <MenuItem value="updatedAt">更新时间</MenuItem>
+                <MenuItem value="updatedAt">最近更新</MenuItem>
                 <MenuItem value="createdAt">创建时间</MenuItem>
-                <MenuItem value="title">标题</MenuItem>
+                <MenuItem value="title">标题排序</MenuItem>
               </Select>
             </FormControl>
           </Box>
 
           {/* 第二行：过滤器和操作按钮 */}
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
-            <Box sx={{ display: 'flex', gap: 1 }}>
+            <Box sx={{ display: 'flex', gap: 2 }}>
               <Chip
-                label={filter.showSealed ? '显示尘封' : '隐藏尘封'}
+                label={filter.showSealed ? '显示尘封记忆' : '隐藏尘封记忆'}
                 onClick={() => setFilter({ showSealed: !filter.showSealed })}
                 color={filter.showSealed ? 'primary' : 'default'}
                 variant={filter.showSealed ? 'filled' : 'outlined'}
-                size="small"
+                size="medium"
+                sx={{
+                  fontWeight: 600,
+                  px: 2,
+                  transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                  '&:hover': {
+                    transform: 'translateY(-2px)',
+                  }
+                }}
               />
             </Box>
 
-            <Box sx={{ display: 'flex', gap: 1 }}>
-              <Tooltip title="刷新">
-                <IconButton size="small" onClick={loadRecords}>
+            <Box sx={{ display: 'flex', gap: 2 }}>
+              <Tooltip title={isDarkMode ? "切换到浅色模式" : "切换到深色模式"} arrow>
+                <IconButton 
+                  size="medium" 
+                  onClick={toggleTheme}
+                  sx={{
+                    backgroundColor: 'rgba(255,255,255,0.1)',
+                    '&:hover': {
+                      backgroundColor: 'rgba(255,255,255,0.2)',
+                      transform: 'rotate(180deg)',
+                    },
+                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                  }}
+                >
+                  {isDarkMode ? <LightModeIcon /> : <DarkModeIcon />}
+                </IconButton>
+              </Tooltip>
+
+              <Tooltip title="刷新记录" arrow>
+                <IconButton 
+                  size="medium" 
+                  onClick={loadRecords}
+                  sx={{
+                    backgroundColor: 'rgba(255,255,255,0.1)',
+                    '&:hover': {
+                      backgroundColor: 'rgba(255,255,255,0.2)',
+                      transform: 'rotate(180deg)',
+                    },
+                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                  }}
+                >
                   <RefreshIcon />
                 </IconButton>
               </Tooltip>
 
-              <Tooltip title="导出数据">
-                <IconButton size="small" onClick={exportData}>
+              <Tooltip title="导出数据" arrow>
+                <IconButton 
+                  size="medium" 
+                  onClick={exportData}
+                  sx={{
+                    backgroundColor: 'rgba(255,255,255,0.1)',
+                    '&:hover': {
+                      backgroundColor: 'rgba(255,255,255,0.2)',
+                    }
+                  }}
+                >
                   <BackupIcon />
                 </IconButton>
               </Tooltip>
 
-              <Tooltip title="导入数据">
-                <IconButton size="small" component="label">
+              <Tooltip title="导入数据" arrow>
+                <IconButton 
+                  size="medium" 
+                  component="label"
+                  sx={{
+                    backgroundColor: 'rgba(255,255,255,0.1)',
+                    '&:hover': {
+                      backgroundColor: 'rgba(255,255,255,0.2)',
+                    }
+                  }}
+                >
                   <RestoreIcon />
                   <input
                     type="file"
@@ -294,8 +450,17 @@ export const HomePage: React.FC = () => {
 
       {/* 加载状态 */}
       {isLoading && (
-        <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
-          <CircularProgress />
+        <Box sx={{ 
+          display: 'flex', 
+          flexDirection: 'column',
+          alignItems: 'center', 
+          py: 8,
+          gap: 3
+        }}>
+          <CircularProgress size={60} thickness={4} />
+          <Typography variant="h6" color="text.secondary">
+            正在加载你的记忆...
+          </Typography>
         </Box>
       )}
 
@@ -303,26 +468,56 @@ export const HomePage: React.FC = () => {
       {!isLoading && (
         <>
           {filteredRecords.length === 0 ? (
-            <Box sx={{ textAlign: 'center', py: 8 }}>
-              <Typography variant="h6" color="text.secondary" gutterBottom>
-                {records.length === 0 ? '还没有任何记录' : '没有找到匹配的记录'}
+            <Box sx={{ 
+              textAlign: 'center', 
+              py: 12,
+              background: 'linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%)',
+              borderRadius: 4,
+              border: '1px solid rgba(255,255,255,0.1)',
+              backdropFilter: 'blur(10px)'
+            }}>
+              <Typography variant="h4" color="text.secondary" gutterBottom sx={{ fontWeight: 600 }}>
+                {records.length === 0 ? '✨ 开始你的记忆之旅' : '🔍 没有找到匹配的记录'}
               </Typography>
-              <Typography variant="body2" color="text.secondary">
-                {records.length === 0 ? '点击右下角的按钮开始记录你的情感' : '尝试调整搜索条件或过滤器'}
+              <Typography variant="body1" color="text.secondary" sx={{ mb: 4, maxWidth: 400, mx: 'auto' }}>
+                {records.length === 0 
+                  ? '在这里记录生活中的点点滴滴，珍藏每一个珍贵的瞬间' 
+                  : '尝试调整搜索条件或过滤器，或许能找到你要寻找的记忆'}
               </Typography>
             </Box>
           ) : (
-            <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: 3 }}>
-              {filteredRecords.map((record) => (
-                <RecordCard
+            <Box sx={{ 
+              display: 'grid', 
+              gridTemplateColumns: 'repeat(auto-fill, minmax(380px, 1fr))', 
+              gap: 4,
+              mb: 10
+            }}>
+              {filteredRecords.map((record, index) => (
+                <Box
                   key={record.id}
-                  record={record}
-                  onEdit={handleEditRecord}
-                  onDelete={deleteRecord}
-                  onSeal={handleSealRecord}
-                  onUnseal={unsealRecord}
-                  onView={handleViewRecord}
-                />
+                  sx={{
+                    animation: `fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) ${index * 0.1}s both`,
+                    '@keyframes fadeInUp': {
+                      from: {
+                        opacity: 0,
+                        transform: 'translateY(30px)',
+                      },
+                      to: {
+                        opacity: 1,
+                        transform: 'translateY(0)',
+                      },
+                    },
+                  }}
+                >
+                  <RecordCard
+                    record={record}
+                    onEdit={handleEditRecord}
+                    onDelete={deleteRecord}
+                    onSeal={handleSealRecord}
+                    onUnseal={unsealRecord}
+                    onView={handleViewRecord}
+                  />
+                </Box>
               ))}
             </Box>
           )}
@@ -335,8 +530,22 @@ export const HomePage: React.FC = () => {
         aria-label="新建记录"
         sx={{
           position: 'fixed',
-          bottom: 24,
-          right: 24,
+          bottom: 32,
+          right: 32,
+          width: 64,
+          height: 64,
+          background: 'linear-gradient(135deg, #6750a4 0%, #03dac6 100%)',
+          boxShadow: '0 8px 32px rgba(103,80,164,0.3)',
+          '&:hover': {
+            background: 'linear-gradient(135deg, #5a42a4 0%, #02b8a8 100%)',
+            boxShadow: '0 12px 40px rgba(103,80,164,0.4)',
+          },
+          '&:active': {
+            transform: 'scale(0.95)',
+          },
+          '& .MuiSvgIcon-root': {
+            fontSize: '1.8rem',
+          }
         }}
         onClick={handleCreateRecord}
       >
