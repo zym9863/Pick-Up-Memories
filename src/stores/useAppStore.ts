@@ -50,6 +50,9 @@ interface AppState {
   setError: (error: string | null) => void;
   clearError: () => void;
   
+  // 工具方法
+  getImageUrl: (imagePath: string) => string;
+  
   // 导入导出
   exportData: () => Promise<void>;
   importData: (file: File) => Promise<void>;
@@ -386,6 +389,11 @@ export const useAppStore = create<AppState>()(
       // 清除错误
       clearError: () => {
         set({ error: null });
+      },
+
+      // 获取图片 URL
+      getImageUrl: (imagePath: string) => {
+        return storageService.getImageUrl(imagePath);
       },
 
       // 导出数据

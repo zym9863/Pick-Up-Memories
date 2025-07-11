@@ -27,6 +27,7 @@ import {
 import { format } from 'date-fns';
 import { zhCN } from 'date-fns/locale';
 import { EmotionalRecord } from '../types';
+import { useAppStore } from '../stores/useAppStore';
 
 interface RecordViewerProps {
   open: boolean;
@@ -42,6 +43,7 @@ export const RecordViewer: React.FC<RecordViewerProps> = ({
   onEdit
 }) => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const getImageUrl = useAppStore(state => state.getImageUrl);
 
   if (!record) return null;
 
@@ -217,7 +219,7 @@ export const RecordViewer: React.FC<RecordViewerProps> = ({
                       onClick={() => handleImageClick(image)}
                     >
                       <img
-                        src={`file://${image}`}
+                        src={getImageUrl(image)}
                         alt={`图片 ${index + 1}`}
                         loading="lazy"
                         style={{
@@ -329,7 +331,7 @@ export const RecordViewer: React.FC<RecordViewerProps> = ({
           {selectedImage && (
             <>
               <img
-                src={`file://${selectedImage}`}
+                src={getImageUrl(selectedImage)}
                 alt="全屏查看"
                 style={{
                   width: '100%',

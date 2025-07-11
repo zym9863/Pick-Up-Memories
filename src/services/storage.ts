@@ -226,33 +226,40 @@ class StorageService {
     }
   }
 
-  // 删除记录相关的文件（简化版本）
+  // 删除记录相关的文件
   private async deleteRecordFiles(record: EmotionalRecord): Promise<void> {
     try {
-      // 在简化版本中，我们只是清理 blob URLs
+      // 清理 blob URLs（如果有的话）
       for (const imagePath of record.images) {
         if (imagePath.startsWith('blob:')) {
           URL.revokeObjectURL(imagePath);
         }
+        // data URLs 不需要清理
       }
 
       if (record.musicUrl && record.musicUrl.startsWith('blob:')) {
         URL.revokeObjectURL(record.musicUrl);
       }
+      // data URLs 不需要清理
     } catch (error) {
       console.error('Failed to delete record files:', error);
     }
   }
 
-  // 保存图片文件（简化版本，暂时返回文件路径）
+  // 保存图片文件
   async saveImage(file: File): Promise<string> {
     try {
-      // 暂时返回一个模拟的文件路径
-      // 在实际应用中，这里应该将文件保存到应用数据目录
-      return URL.createObjectURL(file);
+      // 统一使用 base64 编码保存图片
+      // 这样可以避免 Tauri 中的文件路径访问问题
+      const arrayBuffer = await file.arrayBuffer();
+      const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+      const mimeType = file.type || 'image/jpeg';
+      
+      return `data:${mimeType};base64,${base64}`;
     } catch (error) {
       console.error('Failed to save image:', error);
-      throw new Error('保存图片失败');
+      // 如果转换失败，使用 blob URL 作为后备
+      return URL.createObjectURL(file);
     }
   }
 
@@ -412,6 +419,12 @@ class StorageService {
         totalMusicFiles: 0
       };
     }
+  }
+
+  // 获取图片的显示URL
+  getImageUrl(imagePath: string): string {
+    // 直接返回路径，因为现在我们使用 data URLs 或 blob URLs
+    return imagePath;
   }
 }
 

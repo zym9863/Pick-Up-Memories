@@ -26,6 +26,7 @@ import {
 import { format } from 'date-fns';
 import { zhCN } from 'date-fns/locale';
 import { EmotionalRecord, SealConfig } from '../types';
+import { useAppStore } from '../stores/useAppStore';
 
 interface RecordCardProps {
   record: EmotionalRecord;
@@ -46,6 +47,7 @@ export const RecordCard: React.FC<RecordCardProps> = ({
 }) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const menuOpen = Boolean(anchorEl);
+  const getImageUrl = useAppStore(state => state.getImageUrl);
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     event.stopPropagation();
@@ -242,7 +244,7 @@ export const RecordCard: React.FC<RecordCardProps> = ({
             {record.images.slice(0, 4).map((image, index) => (
               <ImageListItem key={index}>
                 <img
-                  src={`file://${image}`}
+                  src={getImageUrl(image)}
                   alt={`图片 ${index + 1}`}
                   loading="lazy"
                   style={{
